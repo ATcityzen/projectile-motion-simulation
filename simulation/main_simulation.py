@@ -20,8 +20,10 @@ G  = 9.81
 DT = 0.01
 
 velocity   = vector(0, 0, 0)
-launched   = False
-paused     = False
+launched      = False
+paused        = False
+_launch_flash = 0          # countdown frames for Launch button animation
+_peak_range   = 25         # scene.range captured at the trajectory peak
 t          = 0
 speed_mult = 3
 mode3D     = False
@@ -115,7 +117,11 @@ peak_vec     = vector(0, 0, 0)
 scene.append_to_caption("\n")
 
 def do_launch(b):
-    global velocity, launched, t, ideal_trail, peak_highest, peak_vec
+    global velocity, launched, t, ideal_trail, peak_highest, peak_vec, _launch_flash
+    _launch_flash = 130                          # start countdown
+    b.text       = "🚀 Liftoff!"
+    b.background = vector(0.0, 0.78, 0.22)       # bright green burst
+    b.color      = color.white
     t = 0
     spd  = speed_slider.value
     elev = angle_slider.value * pi / 180
@@ -156,7 +162,14 @@ def do_launch(b):
 def do_pause(b):
     global paused
     paused = not paused
-    b.text = "Resume" if paused else "Pause"
+    if paused:
+        b.text       = "▶ Resume"
+        b.background = vector(0.65, 0.30, 0.02)   # amber  → paused
+        b.color      = color.white
+    else:
+        b.text       = "⏸ Pause"
+        b.background = vector(0.85, 0.85, 0.85)   # reset to normal
+        b.color      = color.black
 
 def do_toggle_dim(b):
     global mode3D
@@ -164,35 +177,61 @@ def do_toggle_dim(b):
     if mode3D:
         scene.forward  = vector(-1, -0.4, -0.8)
         scene.userspin = True
-        b.text = "2D View"
+        b.text       = "● 2D View"
+        b.background = vector(0.07, 0.45, 0.18)   # green → active
+        b.color      = color.white
         ax_x.opacity = 1;  ax_y.opacity = 1;  ax_z.opacity = 1
         lbl_x.opacity = 1; lbl_y.opacity = 1; lbl_z.opacity = 1
     else:
         scene.forward  = vector(0, 0, -1)
         scene.userspin = False
-        b.text = "3D View"
+        b.text       = "3D View"
+        b.background = vector(0.85, 0.85, 0.85)   # reset to normal
+        b.color      = color.black
         ax_x.opacity = 0;  ax_y.opacity = 0;  ax_z.opacity = 0
         lbl_x.opacity = 0; lbl_y.opacity = 0; lbl_z.opacity = 0
 
 def do_slow(b):
     global speed_mult
     speed_mult = 1
+    _speed_select(btn_slow)
 
 def do_normal(b):
     global speed_mult
     speed_mult = 3
+    _speed_select(btn_normal)
 
 def do_fast(b):
     global speed_mult
     speed_mult = 9
+    _speed_select(btn_fast)
 
-button(text="Launch 🚀", bind=do_launch)
-button(text="Pause",     bind=do_pause)
-button(text="3D View",   bind=do_toggle_dim)
+# ── helper: highlight the active speed button ────────────────────────
+_ACTIVE_BG  = vector(0.07, 0.45, 0.18)   # green → selected
+_RESET_BG   = vector(0.85, 0.85, 0.85)   # light gray → normal browser look
+
+def _speed_select(active):
+    for btn, lbl in ((btn_slow, "0.3x"), (btn_normal, "1x"), (btn_fast, "3x")):
+        if btn is active:
+            btn.background = _ACTIVE_BG
+            btn.color      = color.white
+            btn.text       = "● " + lbl
+        else:
+            btn.background = _RESET_BG
+            btn.color      = color.black
+            btn.text       = lbl
+
+btn_launch = button(text="Launch 🚀", bind=do_launch)
+btn_pause  = button(text="⏸ Pause",  bind=do_pause)
+btn_dim    = button(text="3D View",   bind=do_toggle_dim)
 scene.append_to_caption("&nbsp;&nbsp;<b>Speed:</b>&nbsp;")
-button(text="0.3x", bind=do_slow)
-button(text="1x",   bind=do_normal)
-button(text="3x",   bind=do_fast)
+btn_slow   = button(text="0.3x", bind=do_slow)
+btn_normal = button(text="● 1x", bind=do_normal)
+btn_fast   = button(text="3x",   bind=do_fast)
+
+# Mark 1x as active on startup
+btn_normal.background = _ACTIVE_BG
+btn_normal.color      = color.white
 
 # ════════════════════════════════════════════════════════════════════
 #  ROW 2 — Sliders  (v₀ · θ elevation · φ azimuth · k drag)
@@ -482,6 +521,17 @@ update_calc(0)
 while True:
     rate(100)
 
+    # ── Launch button flash animation ─────────────────────────────────
+    if _launch_flash > 0:
+        _launch_flash -= 1
+        if _launch_flash == 90:                      # mid-flash: soften
+            btn_launch.text       = "✔ Launched!"
+            btn_launch.background = vector(0.04, 0.55, 0.15)
+        elif _launch_flash == 0:                     # done: reset to normal
+            btn_launch.text       = "Launch 🚀"
+            btn_launch.background = vector(0.85, 0.85, 0.85)
+            btn_launch.color      = color.black
+
     if launched and not paused:
         k = drag_slider.value
 
@@ -498,7 +548,14 @@ while True:
 
             scene.center = ball.pos
             horiz = sqrt(ball.pos.x*ball.pos.x + ball.pos.z*ball.pos.z)
-            scene.range = max(25, horiz * 0.4 + 10)
+            if velocity.y >= 0:
+                # Ascending — zoom out as usual; record the current range
+                scene.range = max(25, horiz * 0.4 + 10)
+                _peak_range = scene.range
+            else:
+                # Descending — zoom back in proportional to remaining height
+                height_frac = max(0.0, ball.pos.y / peak_highest) if peak_highest > 0 else 0.0
+                scene.range = 25 + (_peak_range - 25) * height_frac
 
             if horiz > ground.size.x / 2 - 10:
                 ground.size.x = ground.size.x * 1.5
