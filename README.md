@@ -1,13 +1,13 @@
-## Physics Model
-
+### physics project   **Grade 11 Physics: 3D Kinematics Simulation**
+**St. John's Baptist De La Salle Catholic School**
 The projectile motion is modeled using Newton's Second Law.
 
 The projectile experiences two forces:
 
-1. Gravity
-2. Air resistance (drag)
+1. Gravitational force
+2. Air resistance (drag) force
 
-### Gravity
+### Gravitational force
 
 Gravity acts downward only:
 
@@ -37,7 +37,7 @@ m dv/dt = mg - k v
 
 ### Numerical Integration
 
-The simulation uses Euler integration to update motion step-by-step.
+The simulation uses Euler integration to update the motion step-by-step.
 
 Velocity update:
 
