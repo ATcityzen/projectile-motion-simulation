@@ -11,7 +11,7 @@ The projectile experiences two forces:
 
 Gravity acts downward only:
 
-F_g = m g
+F_g = mg
 
 where g = (0, -9.81, 0)
 
@@ -19,21 +19,21 @@ where g = (0, -9.81, 0)
 
 Drag acts opposite to the velocity vector:
 
-F_drag = -k v
+F_drag = -kv
 
 where
 k = drag coefficient
 v = velocity vector
 
-### Total Force
+### The total Force
 
 The total force acting on the projectile is:
 
-F_total = m g - k v
+F_total = mg - k v
 
 Using Newton's Second Law:
 
-m dv/dt = m g - k v
+m dv/dt = mg - k v
 
 ### Numerical Integration
 
