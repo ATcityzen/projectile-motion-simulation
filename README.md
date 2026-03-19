@@ -16,7 +16,7 @@ where g = (0, -9.81, 0)
 
 ### Drag Force
 
-Drag acts opposite to the velocity vector:
+The drag force acts opposite to the velocity vector:
 
 F_drag = -kv
 
