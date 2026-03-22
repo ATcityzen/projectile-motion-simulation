@@ -660,6 +660,18 @@ while True:
             if ball.pos.y > peak_highest:
                 peak_highest = ball.pos.y
                 peak_vec = vector(ball.pos.x, ball.pos.y, ball.pos.z)
+                peak_marker.pos = peak_vec
+                peak_marker.opacity = 0.9
+
+                peak_label = label(
+    pos=vector(0,0,0),
+    text="",
+    height=14,
+    color=color.yellow,
+    box=False,
+    line=False,
+    opacity=1
+)
 
             data_label.text = (
                 "t=" + str(round(t, 2)) + "s"
