@@ -87,21 +87,32 @@ ball = sphere(
     shininess=0.8,
     make_trail=True,
     trail_color=color.orange,
-    trail_radius=0.18
+    trail_radius=0.3
 )
 # Smoke particles for launch effect
 smoke_particles = []
-ball.retain = 400
+ball.retain = 600
 flash = local_light(pos=cannon.pos, color=color.orange)
 
 # X / Y / Z axis arrows
-ax_x = arrow(pos=vector(0,0,0), axis=vector(12,0,0), shaftwidth=0.3, color=color.red, opacity=0)
-ax_y = arrow(pos=vector(0,0,0), axis=vector(0,12,0), shaftwidth=0.3, color=color.green, opacity=0)
-ax_z = arrow(pos=vector(0,0,0), axis=vector(0,0,12), shaftwidth=0.3, color=color.cyan, opacity=0)
-lbl_x = label(pos=vector(13,0,0), text="X", box=False, height=12, color=color.red, opacity=0)
-lbl_y = label(pos=vector(0,13,0), text="Y", box=False, height=12, color=color.green, opacity=0)
-lbl_z = label(pos=vector(0,0,13), text="Z", box=False, height=12, color=color.cyan, opacity=0)
+ax_x = arrow(pos=vector(0,0,0), axis=vector(12,0,0), shaftwidth=0.4, color=color.red, opacity=0)
+ax_y = arrow(pos=vector(0,0,0), axis=vector(0,12,0), shaftwidth=0.4, color=color.green, opacity=0)
+ax_z = arrow(pos=vector(0,0,0), axis=vector(0,0,12), shaftwidth=0.4, color=color.yellow, opacity=0)
 
+lbl_x = label(pos=vector(13,0,0), text="X",
+              height=12, color=color.red,
+              box=False, line=False,
+              opacity=0, background=color.black)
+
+lbl_y = label(pos=vector(0,13,0), text="Y",
+              height=12, color=color.green,
+              box=False, line=False,
+              opacity=0, background=color.black)
+
+lbl_z = label(pos=vector(0,0,13), text="Z",
+              height=12, color=color.yellow,
+              box=False, line=False,
+              opacity=0, background=color.black)
 # Live data label (FIXED: box=False removes the ugly black background)
 lbl_px, lbl_py = 330, 140
 _drag_active = False
